@@ -377,8 +377,14 @@ def get_model_filenames(model_dir):
         raise ValueError('No meta file found in the model directory (%s)' % model_dir)
     elif len(meta_files)>1:
         raise ValueError('There should not be more than one meta file in the model directory (%s)' % model_dir)
+
+    ckpt_files = [s for s in files if s.endswith('.ckpt')]
+    if len(meta_files) == 0:
+        raise ValueError('No checkpoint file found in the model directory (%s)' % model_dir)
+    elif len(meta_files) > 1:
+        raise ValueError('There should not be more than one checkpoint file in the model directory (%s)' % model_dir)
     meta_file = meta_files[0]
-    ckpt_file = tf.train.get_checkpoint_state(model_dir).model_checkpoint_path
+    ckpt_file = ckpt_files[0]
     return meta_file, ckpt_file
 
 def calculate_roc(thresholds, embeddings1, embeddings2, actual_issame, nrof_folds=10):
