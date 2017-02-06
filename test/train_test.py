@@ -34,8 +34,8 @@ import compare
 import visualize
 import test_invariance_on_lfw
 
+
 class TrainTest(unittest.TestCase):
-  
     @classmethod
     def setUpClass(self):
         self.tmp_dir = tempfile.mkdtemp()
@@ -43,7 +43,7 @@ class TrainTest(unittest.TestCase):
         create_mock_dataset(self.dataset_dir)
         self.lfw_pairs_file = create_mock_lfw_pairs(self.tmp_dir)
         print(self.lfw_pairs_file)
-        
+
     @classmethod
     def tearDownClass(self):
         # Recursively remove the temporary directory
@@ -61,18 +61,17 @@ class TrainTest(unittest.TestCase):
                 '--images_per_person', '3',
                 '--lfw_pairs', self.lfw_pairs_file,
                 '--lfw_dir', self.dataset_dir,
-                '--lfw_nrof_folds', '2' ]
+                '--lfw_nrof_folds', '2']
         args = facenet_train.parse_arguments(argv)
         model_dir = facenet_train.main(args)
-        
-        
+
         model_file = os.path.join(model_dir, 'model.ckpt-1')
         # Check that the trained model can be loaded
         tf.reset_default_graph()
         argv = [model_file,
                 self.dataset_dir,
                 '--lfw_pairs', self.lfw_pairs_file,
-                '--lfw_nrof_folds', '2' ]
+                '--lfw_nrof_folds', '2']
         args = validate_on_lfw.parse_arguments(argv)
         validate_on_lfw.main(args)
 
@@ -88,7 +87,7 @@ class TrainTest(unittest.TestCase):
                 '--images_per_person', '3',
                 '--lfw_pairs', self.lfw_pairs_file,
                 '--lfw_dir', self.dataset_dir,
-                '--lfw_nrof_folds', '2' ]
+                '--lfw_nrof_folds', '2']
         args = facenet_train.parse_arguments(argv)
         facenet_train.main(args)
 
@@ -102,7 +101,7 @@ class TrainTest(unittest.TestCase):
                 '--batch_size', '6',
                 '--lfw_pairs', self.lfw_pairs_file,
                 '--lfw_dir', self.dataset_dir,
-                '--lfw_nrof_folds', '2' ]
+                '--lfw_nrof_folds', '2']
         args = facenet_train_classifier.parse_arguments(argv)
         facenet_train_classifier.main(args)
 
@@ -117,7 +116,7 @@ class TrainTest(unittest.TestCase):
                 '--lfw_pairs', self.lfw_pairs_file,
                 '--lfw_dir', self.dataset_dir,
                 '--lfw_nrof_folds', '2',
-                '--nrof_preprocess_threads', '1' ]
+                '--nrof_preprocess_threads', '1']
         args = facenet_train_classifier.parse_arguments(argv)
         facenet_train_classifier.main(args)
 
@@ -132,7 +131,7 @@ class TrainTest(unittest.TestCase):
                 '--lfw_pairs', self.lfw_pairs_file,
                 '--lfw_dir', self.dataset_dir,
                 '--lfw_nrof_folds', '2',
-                '--nrof_preprocess_threads', '1' ]
+                '--nrof_preprocess_threads', '1']
         args = facenet_train_classifier.parse_arguments(argv)
         facenet_train_classifier.main(args)
 
@@ -141,15 +140,15 @@ class TrainTest(unittest.TestCase):
                 'model-20161030-023650.meta',
                 'model-20161030-023650.ckpt-80000',
                 '../data/images/Anthony_Hopkins_0001.jpg',
-                '../data/images/Anthony_Hopkins_0002.jpg' ]
+                '../data/images/Anthony_Hopkins_0002.jpg']
         args = compare.parse_arguments(argv)
         compare.main(args)
 
     def test_visualize(self):
         model_dir = os.path.abspath('../data/model/20160620-173927')
         create_checkpoint_file(model_dir, 'model.ckpt-500000')
-        argv = [model_dir, 
-                '--model_def', 'models.nn4' ]
+        argv = [model_dir,
+                '--model_def', 'models.nn4']
         args = visualize.parse_arguments(argv)
         visualize.main(args)
 
@@ -163,9 +162,10 @@ class TrainTest(unittest.TestCase):
                 '--orig_image_size', '96',
                 '--nrof_offsets', '1',
                 '--nrof_angles', '1',
-                '--nrof_scales', '1' ]
+                '--nrof_scales', '1']
         args = test_invariance_on_lfw.parse_arguments(argv)
         test_invariance_on_lfw.main(args)
+
 
 # Create a checkpoint file pointing to the model
 def create_checkpoint_file(model_dir, model_file):
@@ -174,23 +174,24 @@ def create_checkpoint_file(model_dir, model_file):
     with open(checkpoint_filename, 'w') as f:
         f.write('model_checkpoint_path: "%s"\n' % full_model_filename)
         f.write('all_model_checkpoint_paths: "%s"\n' % full_model_filename)
-        
+
+
 # Create a mock dataset with random pixel images
 def create_mock_dataset(dataset_dir):
-   
     nrof_persons = 3
     nrof_images_per_person = 2
     np.random.seed(seed=666)
     os.mkdir(dataset_dir)
     for i in range(nrof_persons):
-        class_name = '%04d' % (i+1)
+        class_name = '%04d' % (i + 1)
         class_dir = os.path.join(dataset_dir, class_name)
         os.mkdir(class_dir)
         for j in range(nrof_images_per_person):
-            img_name = '%04d' % (j+1)
-            img_path = os.path.join(class_dir, class_name+'_'+img_name + '.png')
-            img = np.random.uniform(low=0.0, high=255.0, size=(96,96,3))
-            cv2.imwrite(img_path, img) #pylint: disable=maybe-no-member
+            img_name = '%04d' % (j + 1)
+            img_path = os.path.join(class_dir, class_name + '_' + img_name + '.png')
+            img = np.random.uniform(low=0.0, high=255.0, size=(96, 96, 3))
+            cv2.imwrite(img_path, img)  # pylint: disable=maybe-no-member
+
 
 # Create a mock LFW pairs file
 def create_mock_lfw_pairs(tmp_dir):
@@ -211,6 +212,6 @@ def create_mock_lfw_pairs(tmp_dir):
         f.write('0001 1 0003 2\n')
     return pairs_filename
 
+
 if __name__ == "__main__":
     unittest.main()
-    
