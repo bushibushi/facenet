@@ -85,7 +85,6 @@ def main(args):
             print('Accuracy: %1.3f+-%1.3f' % (np.mean(accuracy), np.std(accuracy)))
             print('Validation rate: %2.5f+-%2.5f @ FAR=%2.5f' % (val, val_std, far))
 
-            facenet.plot_roc(fpr, tpr, 'NN4')
             
 def parse_arguments(argv):
     parser = argparse.ArgumentParser()
