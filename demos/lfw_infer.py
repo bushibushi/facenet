@@ -38,12 +38,11 @@ import os
 import sys
 import math
 
+
+
 def main(args):
-
     with tf.Graph().as_default():
-
         with tf.Session() as sess:
-
             # Read the file containing the pairs used for testing
             pairs = lfw.read_pairs(os.path.expanduser(args.lfw_pairs))
 
@@ -65,43 +64,48 @@ def main(args):
             image_size = images_placeholder.get_shape()[1]
             embedding_size = embeddings.get_shape()[1]
 
+            print(embedding_size)
+
             # Run forward pass to calculate embeddings
             print('Runnning forward pass on LFW images')
             batch_size = args.lfw_batch_size
             nrof_images = len(paths)
-            nrof_batches = int(math.ceil(1.0*nrof_images / batch_size))
+            nrof_batches = int(math.ceil(1.0 * nrof_images / batch_size))
             emb_array = np.zeros((nrof_images, embedding_size))
             for i in range(nrof_batches):
-                start_index = i*batch_size
-                end_index = min((i+1)*batch_size, nrof_images)
+                start_index = i * batch_size
+                end_index = min((i + 1) * batch_size, nrof_images)
                 paths_batch = paths[start_index:end_index]
                 images = facenet.load_data(paths_batch, False, False, image_size)
-                feed_dict = { images_placeholder:images}
-                emb_array[start_index:end_index,:] = sess.run(embeddings, feed_dict=feed_dict)
+                feed_dict = {images_placeholder: images}
+                emb_array[start_index:end_index, :] = sess.run(embeddings, feed_dict=feed_dict)
 
             tpr, fpr, accuracy, val, val_std, far = lfw.evaluate(emb_array,
-                actual_issame, nrof_folds=args.lfw_nrof_folds)
+                                                                 actual_issame, nrof_folds=args.lfw_nrof_folds)
 
             print('Accuracy: %1.3f+-%1.3f' % (np.mean(accuracy), np.std(accuracy)))
             print('Validation rate: %2.5f+-%2.5f @ FAR=%2.5f' % (val, val_std, far))
+            bottleneck_string = ','.join(str(x) for x in emb_array)
+            with open('/tmp/embeddings.txt', 'w') as bottleneck_file:
+                bottleneck_file.write(bottleneck_string)
 
-            
 def parse_arguments(argv):
     parser = argparse.ArgumentParser()
-    
+
     parser.add_argument('lfw_dir', type=str,
-        help='Path to the data directory containing aligned LFW face patches.')
+                        help='Path to the data directory containing aligned LFW face patches.')
     parser.add_argument('--lfw_batch_size', type=int,
-        help='Number of images to process in a batch in the LFW test set.', default=100)
-    parser.add_argument('model_dir', type=str, 
-        help='Directory containing the metagraph (.meta) file and the checkpoint (ckpt) file containing model parameters')
+                        help='Number of images to process in a batch in the LFW test set.', default=100)
+    parser.add_argument('model_dir', type=str,
+                        help='Directory containing the metagraph (.meta) file and the checkpoint (ckpt) file containing model parameters')
     parser.add_argument('--lfw_pairs', type=str,
-        help='The file containing the pairs to use for validation.', default='../data/pairs.txt')
+                        help='The file containing the pairs to use for validation.', default='../data/pairs.txt')
     parser.add_argument('--lfw_file_ext', type=str,
-        help='The file extension for the LFW dataset.', default='png', choices=['jpg', 'png'])
+                        help='The file extension for the LFW dataset.', default='png', choices=['jpg', 'png'])
     parser.add_argument('--lfw_nrof_folds', type=int,
-        help='Number of folds to use for cross validation. Mainly used for testing.', default=10)
+                        help='Number of folds to use for cross validation. Mainly used for testing.', default=10)
     return parser.parse_args(argv)
+
 
 if __name__ == '__main__':
     main(parse_arguments(sys.argv[1:]))
