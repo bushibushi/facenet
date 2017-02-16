@@ -85,9 +85,7 @@ def main(args):
 
             print('Accuracy: %1.3f+-%1.3f' % (np.mean(accuracy), np.std(accuracy)))
             print('Validation rate: %2.5f+-%2.5f @ FAR=%2.5f' % (val, val_std, far))
-            bottleneck_string = ','.join(str(x) for x in emb_array)
-            with open('/tmp/embeddings.txt', 'w') as bottleneck_file:
-                bottleneck_file.write(bottleneck_string)
+            np.savetxt("/tmp/embeddings.csv", emb_array, delimiter=",")
 
 def parse_arguments(argv):
     parser = argparse.ArgumentParser()
