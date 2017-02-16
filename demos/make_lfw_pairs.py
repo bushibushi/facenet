@@ -42,26 +42,25 @@ def pop_random(lst):
 
 def main(args):
     i = 0
-    dirs = list(listdir_nohidden_gen(args.lfw_dir))
-
-    print(len(dirs))
 
     with open('/tmp/diff_pairs.txt', 'w') as pairs_file:
-        while len(dirs) > 0:
-            dirs_copy = dirs.copy()
-            _, dir1 = pop_random(dirs)
-            files1 = os.listdir(dir1)
-            while len(files1) > 0 and len(dirs_copy) > 0:
-                file1, _ = pop_random(files1)
-                _, dir2 = pop_random(dirs_copy)
-                files2 = os.listdir(dir2)
-                file2, _ = pop_random(files2)
-                pairs_file.write(
-                    os.path.basename(dir1) + " " + str(file1 + 1) + " " + os.path.basename(dir2) + " " + str(
-                        file2 + 1) + "\n")
-                i += 1
-                if i % 100 == 0:
-                    print(i)
+        for dummy in range(0, 40):
+            dirs = list(listdir_nohidden_gen(args.lfw_dir))
+            while len(dirs) > 0:
+                dirs_copy = dirs.copy()
+                _, dir1 = pop_random(dirs)
+                files1 = os.listdir(dir1)
+                while len(files1) > 0 and len(dirs_copy) > 0:
+                    file1, _ = pop_random(files1)
+                    _, dir2 = pop_random(dirs_copy)
+                    files2 = os.listdir(dir2)
+                    file2, _ = pop_random(files2)
+                    pairs_file.write(
+                        os.path.basename(dir1) + " " + str(file1 + 1) + " " + os.path.basename(dir2) + " " + str(
+                            file2 + 1) + "\n")
+                    i += 1
+                    if i % 10000 == 0:
+                        print(i)
 
     print("Producing all pairs for identical peolpe.")
     dirs = list(listdir_nohidden_gen(args.lfw_dir))
@@ -75,7 +74,7 @@ def main(args):
                         os.path.basename(dir) + " " + str(file1 + 1) + " " + os.path.basename(dir) + " " + str(
                             file2 + 1) + "\n")
                     i += 1
-                    if i % 100 == 0:
+                    if i % 10000 == 0:
                         print(i)
 
 
