@@ -63,6 +63,20 @@ def main(args):
                 if i % 100 == 0:
                     print(i)
 
+    print("Producing all pairs for identical peolpe.")
+    dirs = list(listdir_nohidden_gen(args.lfw_dir))
+
+    with open('/tmp/same_pairs.txt', 'w') as pairs_file:
+        for dir in dirs:
+            files_range = range(len(os.listdir(dir)))
+            for file1, file2 in itertools.product(files_range, files_range):
+                if file1 != file2:
+                    pairs_file.write(
+                        os.path.basename(dir) + " " + str(file1 + 1) + " " + os.path.basename(dir) + " " + str(
+                            file2 + 1) + "\n")
+                    i += 1
+                    if i % 100 == 0:
+                        print(i)
 
 
 def parse_arguments(argv):
