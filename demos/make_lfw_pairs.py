@@ -44,7 +44,7 @@ def main(args):
     i = 0
 
     with open('/tmp/diff_pairs.txt', 'w') as pairs_file:
-        for dummy in range(0, 40):
+        for dummy in range(0, 20):
             dirs = list(listdir_nohidden_gen(args.lfw_dir))
             while len(dirs) > 0:
                 dirs_copy = dirs.copy()
@@ -69,7 +69,7 @@ def main(args):
         for dir in dirs:
             files_range = range(len(os.listdir(dir)))
             for file1, file2 in itertools.product(files_range, files_range):
-                if file1 != file2:
+                if file1 < file2:
                     pairs_file.write(
                         os.path.basename(dir) + " " + str(file1 + 1) + " " + os.path.basename(dir) + " " + str(
                             file2 + 1) + "\n")
