@@ -62,7 +62,7 @@ def main(args):
                     if i % 10000 == 0:
                         print(i)
 
-    print("Producing all pairs for identical peolpe.")
+    print("Producing all pairs for identical people.")
     dirs = list(listdir_nohidden_gen(args.lfw_dir))
 
     with open('/tmp/same_pairs.txt', 'w') as pairs_file:
