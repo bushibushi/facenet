@@ -57,7 +57,7 @@ def get_paths(lfw_dir, pairs, file_ext):
         elif len(pair) == 4:
             path0 = os.path.join(lfw_dir, pair[0], pair[0] + '_' + '%04d' % int(pair[1]) + '.' + file_ext)
             path1 = os.path.join(lfw_dir, pair[2], pair[2] + '_' + '%04d' % int(pair[3]) + '.' + file_ext)
-            issame = False
+            issame = (pair[0] == pair[2])
         if os.path.exists(path0) and os.path.exists(path1):  # Only add the pair if both paths exist
             path_list += (path0, path1)
             issame_list.append(issame)
