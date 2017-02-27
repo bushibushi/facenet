@@ -44,20 +44,22 @@ def main(args):
     i = 0
 
     with open('/tmp/diff_pairs.txt', 'w') as pairs_file:
-        for dummy in range(0, 20):
+        for dummy in range(0, 200):
             dirs = list(listdir_nohidden_gen(args.lfw_dir))
             while len(dirs) > 0:
                 dirs_copy = dirs.copy()
                 _, dir1 = pop_random(dirs)
                 files1 = os.listdir(dir1)
-                while len(files1) > 0 and len(dirs_copy) > 0:
-                    file1, _ = pop_random(files1)
+                files1_index = 0
+                while len(files1) > files1_index and len(dirs_copy) > 0:
                     _, dir2 = pop_random(dirs_copy)
                     files2 = os.listdir(dir2)
                     file2, _ = pop_random(files2)
                     pairs_file.write(
-                        os.path.basename(dir1) + " " + str(file1 + 1) + " " + os.path.basename(dir2) + " " + str(
+                        os.path.basename(dir1) + " " + str(files1_index + 1) + " " + os.path.basename(dir2) + " " + str(
                             file2 + 1) + "\n")
+
+                    files1_index += 1
                     i += 1
                     if i % 10000 == 0:
                         print(i)
