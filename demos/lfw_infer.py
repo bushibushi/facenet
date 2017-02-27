@@ -85,7 +85,9 @@ def main(args):
 
             print('Accuracy: %1.3f+-%1.3f' % (np.mean(accuracy), np.std(accuracy)))
             print('Validation rate: %2.5f+-%2.5f @ FAR=%2.5f' % (val, val_std, far))
-            np.savetxt("/tmp/embeddings.csv", emb_array, delimiter=",")
+
+            embeddings = np.concatenate((paths_batch, emb_array), axis=1)
+            np.savetxt("/tmp/embeddings.csv", embeddings, delimiter=",")
 
 def parse_arguments(argv):
     parser = argparse.ArgumentParser()

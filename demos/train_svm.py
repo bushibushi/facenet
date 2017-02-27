@@ -27,53 +27,56 @@ import os
 import sys
 import argparse
 from sklearn import svm
+import numpy as np
 
 
-def get_paths(lfw_dir, pairs, file_ext):
-    nrof_skipped_pairs = 0
-    path_list = []
-    issame_list = []
-    for pair in pairs:
-        if len(pair) == 3:
-            path0 = os.path.join(lfw_dir, pair[0], pair[0] + '_' + '%04d' % int(pair[1]) + '.' + file_ext)
-            path1 = os.path.join(lfw_dir, pair[0], pair[0] + '_' + '%04d' % int(pair[2]) + '.' + file_ext)
-            issame = True
-        elif len(pair) == 4:
-            path0 = os.path.join(lfw_dir, pair[0], pair[0] + '_' + '%04d' % int(pair[1]) + '.' + file_ext)
-            path1 = os.path.join(lfw_dir, pair[2], pair[2] + '_' + '%04d' % int(pair[3]) + '.' + file_ext)
-            issame = False
-        if os.path.exists(path0) and os.path.exists(path1):  # Only add the pair if both paths exist
-            path_list += (path0, path1)
-            issame_list.append(issame)
-        else:
-            nrof_skipped_pairs += 1
-    if nrof_skipped_pairs > 0:
-        print('Skipped %d image pairs' % nrof_skipped_pairs)
+# TODO very dirty hash for now :/
+def get_embedding(lfw_dir, embeddings, pair0, pair1):
+    return embeddings[os.path.join(lfw_dir, pair0, pair0 + '_' + '%04d' % int(pair1) + '.png')]
 
 
-def get_bottleneck_diff(pair):
-    pass
+def get_bottleneck_diff(lfw_dir, embeddings, pair):
+    # Get embedding 1
+    emb1 = get_embedding(lfw_dir, embeddings, pair[0], pair[1])
+    # 2
+    emb2 = get_embedding(lfw_dir, embeddings, pair[2], pair[3])
+
+    # TODO if slow, think about doing this array wise with numpy instead of line per line.
+    emb_diff = emb1 - emb2
+    emb_diff_squared = np.multiply(emb_diff, emb_diff)
+    emb_sum = emb1 + emb2
+    return np.divide(emb_diff_squared, emb_sum)
 
 
 def main(args):
-    args.same_pairs_file
+    #  Load cached bottlenecks
+    #  Create dict from unloaded numpy array ?
+    embeddings_np = np.loadtxt("/tmp/embeddings.csv", delimiter=",")
+    embeddings = embeddings_np  # TODO dict ?
 
-    args.diff_pairs_file
+    # Model variables
 
     X = []  # bottlenecks diff / L2 for each pair
     Y = []  # 1 for same, 0 for diff
-    with open('/tmp/same_pairs.txt', 'r') as pairs_file:
-        for line in pairs_file.readlines()[1:]:
-            pair = line.strip().split()
-            X.append(get_bottleneck_diff(pair))
-            Y.append(pair[0] == pair[2])
-            assert(pair[0] == pair[2])
 
-    with open('/tmp/diff_pairs.txt', 'r') as pairs_file:
+    # Read Same pair file, fetch both bottlenecks and make the diff, add point to np array and corresponding label
+
+    with open(args.same_pairs_file, 'r') as pairs_file:
         for line in pairs_file.readlines()[1:]:
             pair = line.strip().split()
-            X.append(get_bottleneck_diff(pair))
+            X.append(get_bottleneck_diff(args.lfw_dir, embeddings, pair))
             Y.append(pair[0] == pair[2])
+            assert (pair[0] == pair[2])
+
+    # Do the same with diff pair files
+
+    with open(args.diff_pairs_file, 'r') as pairs_file:
+        for line in pairs_file.readlines()[1:]:
+            pair = line.strip().split()
+            X.append(get_bottleneck_diff(args.lfw_dir, embeddings, pair))
+            Y.append(pair[0] == pair[2])
+
+    # Feed the computed points to a linear SVM
 
     lin_clf = svm.LinearSVC()
     lin_clf.fit(X, Y)
@@ -82,15 +85,21 @@ def main(args):
 def parse_arguments(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        '--lfw_dir',
+        type=str,
+        default='/Users/bushi/datasets/face_recognition/lfw/lfw-mtcnnpy_160',
+        help='Path to LFW dataset.'
+    )
+    parser.add_argument(
         '--same_pairs_file',
         type=str,
-        default='/tmp/same_pairs.txt',
+        default='./same_pairs.txt',
         help='Path to the file identifying pairs of photos of the same person from the LFW dataset.'
     )
     parser.add_argument(
         '--diff_pairs_file',
         type=str,
-        default='/tmp/diff_pairs.txt',
+        default='./diff_pairs.txt',
         help='Path to the file identifying pairs of photos of different persons from the LFW dataset.'
     )
     return parser.parse_args(argv)
